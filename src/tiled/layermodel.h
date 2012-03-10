@@ -27,6 +27,7 @@
 namespace Tiled {
 
 class Layer;
+class ObjectGroup;
 class Map;
 
 namespace Internal {

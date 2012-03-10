@@ -36,6 +36,7 @@ class QUndoStack;
 namespace Tiled {
 
 class Layer;
+class ObjectGroup;
 class Map;
 class MapObject;
 class MapRenderer;
@@ -150,6 +151,11 @@ public:
     void moveTileset(int from, int to);
     void setTilesetFileName(Tileset *tileset, const QString &fileName);
     void setTilesetName(Tileset *tileset, const QString &name);
+
+    /**
+      * Returns an objectGroupLayer named "Pads" if one exists
+      */
+    ObjectGroup* padsLayer();
 
     /**
      * Returns the layer model. Can be used to modify the layer stack of the

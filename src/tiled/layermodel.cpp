@@ -23,6 +23,7 @@
 #include "map.h"
 #include "mapdocument.h"
 #include "layer.h"
+#include "objectgroup.h"
 #include "renamelayer.h"
 #include "tilelayer.h"
 

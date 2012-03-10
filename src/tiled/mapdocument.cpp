@@ -541,3 +541,14 @@ void MapDocument::setTilesetName(Tileset *tileset, const QString &name)
     tileset->setName(name);
     emit tilesetNameChanged(tileset);
 }
+
+ObjectGroup *MapDocument::padsLayer(){
+    foreach(Layer* layer, mMap->layers()){
+        if (layer->name() == tr("Pads")){
+            qDebug("OMG WE GOT THE PADS LAYER!");
+            return (ObjectGroup*)layer;
+        }
+    }
+    qDebug("No pads layer found");
+    return 0;
+}
