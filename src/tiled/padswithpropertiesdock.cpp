@@ -3,10 +3,13 @@
 #include "layer.h"
 #include "padslayermodel.h"
 #include "map.h"
+#include "mapobject.h"
 #include "mapdocumentactionhandler.h"
 #include "propertiesdialog.h"
 #include "objectpropertiesdialog.h"
 #include "objectgroup.h"
+#include "mainwindow.h"
+#include "documentmanager.h"
 
 #include <QBoxLayout>
 #include <QApplication>
@@ -53,6 +56,21 @@ void PadsWithPropertiesDock::setMapDocument(MapDocument *mapDocument)
     mObjectsView->setMapDocument(mapDocument);
 }
 
+void PadsWithPropertiesDock::mapObjectSelected(MapObject *mapObj){
+    DocumentManager *currentDocument = DocumentManager::instance();
+    MapView *currentMapView = currentDocument->currentMapView();
+    MapScene *currentMapScene = currentDocument->currentMapScene();
+
+    MapObjectItem *selectedObjectItem = currentMapScene->itemForObject(mapObj);
+    QList<MapObjectItem*> newSelectedObjectItems = QList<MapObjectItem*>();
+    newSelectedObjectItems.push_back(selectedObjectItem);
+    QPointF mapObjPos = currentMapView->mapToScene( mapObj->position().toPoint());
+
+
+    currentDocument->currentMapView()->centerOn((QGraphicsItem*)selectedObjectItem);
+    currentDocument->currentMapScene()->setSelectedObjectItems(newSelectedObjectItems.toSet());
+}
+
 
 PadObjectsView::PadObjectsView(QWidget *parent):
     QTreeView(parent),
@@ -86,27 +104,40 @@ void PadObjectsView::setMapDocument(MapDocument *mapDocument)
 
         if (mPadsLayerModel){
             delete mPadsLayerModel;
+            mPadsLayerModel = 0;
         }
-        mPadsLayerModel = new PadsLayerModel();
-        mPadsLayerModel->setPadsLayer(padsLayer);
-        setModel(mPadsLayerModel);
 
-        QItemSelectionModel *s = selectionModel();
-        connect(s, SIGNAL(currentRowChanged(QModelIndex,QModelIndex)),
-                this, SLOT(currentRowChanged(QModelIndex)));
+        if (padsLayer){
+            mPadsLayerModel = new PadsLayerModel();
+            mPadsLayerModel->setPadsLayer(padsLayer);
+            setModel(mPadsLayerModel);
 
-    } else {
+            QItemSelectionModel *s = selectionModel();
+            connect(s, SIGNAL(currentRowChanged(QModelIndex,QModelIndex)),
+                    this, SLOT(currentRowChanged(QModelIndex)));
+            connect(mMapDocument, SIGNAL(objectsAdded(QList<MapObject*>)), this, SLOT(layerObjectsChanged()));
+            connect(mMapDocument, SIGNAL(objectsChanged(QList<MapObject*>)), this, SLOT(layerObjectsChanged()));
+            connect(mMapDocument, SIGNAL(objectsRemoved(QList<MapObject*>)), this, SLOT(layerObjectsChanged()));
+        }else {
+            setModel(0);
+        }
+    }
+    else {
         setModel(0);
     }
 }
 
+
+void PadObjectsView::layerObjectsChanged(){
+    mPadsLayerModel->reloadData();
+    this->reset();
+}
+
 void PadObjectsView::currentRowChanged(const QModelIndex &index)
 {
-    qDebug("CURRENT ROW IS CHANGED!");
-//    const int layer = mMapDocument->layerModel()->toLayerIndex(index);
-//    mMapDocument->setSelectedObjects();
-
-    //TODO: Select the object in the map view and center the map view on it.
+    MapObject *selectedMapObject = mPadsLayerModel->getSpecialMapObjects()->at(index.row());
+    PadsWithPropertiesDock* dockParent =  (PadsWithPropertiesDock*)parent();
+    dockParent->mapObjectSelected(selectedMapObject);
 }
 
 void PadObjectsView::contextMenuEvent(QContextMenuEvent *event)
@@ -131,8 +162,6 @@ void PadObjectsView::contextMenuEvent(QContextMenuEvent *event)
 
 void PadObjectsView::showProperties(QAction*action){
     int row = action->data().toInt();
-
-    qDebug("ROW: %i", row);
     MapObject *selectedMapObject = mPadsLayerModel->getSpecialMapObjects()->at(row);
     ObjectPropertiesDialog propertiesDialog(mMapDocument, selectedMapObject, this);
     propertiesDialog.exec();

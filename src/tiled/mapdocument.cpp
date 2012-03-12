@@ -545,7 +545,6 @@ void MapDocument::setTilesetName(Tileset *tileset, const QString &name)
 ObjectGroup *MapDocument::padsLayer(){
     foreach(Layer* layer, mMap->layers()){
         if (layer->name() == tr("Pads")){
-            qDebug("OMG WE GOT THE PADS LAYER!");
             return (ObjectGroup*)layer;
         }
     }

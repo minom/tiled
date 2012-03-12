@@ -18,18 +18,25 @@ void PadsLayerModel::setPadsLayer(ObjectGroup *padsLayer){
     }
     mPadsLayer = padsLayer;
 
+    this->reloadData();
+}
+
+
+void PadsLayerModel::reloadData(){
     if (specialMapObjects){
         delete specialMapObjects;
+        specialMapObjects = 0;
     }
 
-    specialMapObjects = new QList<MapObject*>();
-    foreach (MapObject *candidate, mPadsLayer->objects()){
-        if (candidate->name() != tr("") || candidate->properties().count() > 0 || candidate->type() != tr("")){
-            specialMapObjects->push_back( candidate );
+    if (mPadsLayer){
+        specialMapObjects = new QList<MapObject*>();
+        foreach (MapObject *candidate, mPadsLayer->objects()){
+            if (candidate->name() != tr("") || candidate->properties().count() > 0 || candidate->type() != tr("")){
+                specialMapObjects->push_back( candidate );
+            }
         }
     }
 }
-
 
 int PadsLayerModel::rowCount(const QModelIndex &parent) const{
     if (!mPadsLayer){

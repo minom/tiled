@@ -14,7 +14,7 @@ class PadsLayerModel : public QAbstractListModel
 public:
     explicit PadsLayerModel(QObject *parent = 0);
     void setPadsLayer(ObjectGroup *layer);
-
+    void reloadData();
     /**
      * Returns the number of rows.
      */

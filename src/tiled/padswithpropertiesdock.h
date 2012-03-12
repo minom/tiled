@@ -11,6 +11,7 @@ class QModelIndex;
 class QUndoStack;
 
 namespace Tiled {
+class MapObject;
 namespace Internal {
 
 
@@ -23,6 +24,7 @@ class PadsWithPropertiesDock : public QDockWidget
 public:
     PadsWithPropertiesDock(QWidget *parent = 0);
     void setMapDocument(MapDocument *mapDocument);
+    void mapObjectSelected(MapObject *mapObj);
 signals:
     
 public slots:
@@ -54,8 +56,8 @@ protected:
 private slots:
     void currentRowChanged(const QModelIndex &index);
     void showProperties(QAction* action);
+    void layerObjectsChanged();
 //    void currentLayerIndexChanged(int index);
-
 //    void editLayerName();
 
 private:
